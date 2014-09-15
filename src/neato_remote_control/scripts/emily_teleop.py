@@ -52,17 +52,34 @@ def getch():
     return ch
 
 
-def talker():
-    pub = rospy.Publisher('chatter', String, queue_size=10)
-    rospy.init_node('talker', anonymous=True)
+def emily_teleop():
+    """ 
+    Simple neato remote controller. 
+
+    a : go forward
+    k : pause
+    r : rotate
+
+    """
+
+    pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+    rospy.init_node('emily_teleop', anonymous=True)
+   
     r = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
-        str = "hello world %s"%rospy.get_time()
-        rospy.loginfo(str)
+        ch = getch()
+        if ch == 'a': # go forward
+            msg = Twist(Vector3(1, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
+        elif ch == 'k': # pause
+            msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
+        elif ch == 'r': # rotate
+            msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 1))
+        elif ch == 'q':
+            break        
         pub.publish(str)
         r.sleep()
         
 if __name__ == '__main__':
     try:
-        talker()
+        emily_teleop()
     except rospy.ROSInterruptException: pass
