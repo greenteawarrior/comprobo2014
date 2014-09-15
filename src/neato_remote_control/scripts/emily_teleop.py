@@ -51,19 +51,47 @@ def getch():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
 
+def process_laser_scan(msg):
+    """
+    Helper function for wall_detector() - obtains the laser scan 
+    data and then returns the running average of the distance from
+    the neato to the walls. 
+    """
+    # keep track of variables
+    # calculate the average
+    # print the average
 
-def emily_teleop():
+
+def wall_detector():
+    """
+    Uses proportional control to make sure that the neato
+    stays one meter away from the walls.
+    """
+    pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+    sub = rospy.Subscriber('scan', LaserScan, process_laser_scan) 
+    # process_laser_scan is the callback function
+
+    rospy.init_node('emily_wall_detector', anonymous=True)
+    r = rospy.Rate(10) # 10hz
+    while not rospy.is_shutdown():
+
+        # logic for determining msg here
+
+        pub.publish(msg)
+        r.sleep()
+
+def keyboard_control():
     """ 
     Simple neato remote controller. 
 
+    Keyboard controls:
     a : go forward
     k : pause
     r : rotate
 
     """
-
     pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-    rospy.init_node('emily_teleop', anonymous=True)
+    rospy.init_node('keyboard_control', anonymous=True)
    
     r = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
@@ -76,10 +104,11 @@ def emily_teleop():
             msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 1))
         elif ch == 'q':
             break        
-        pub.publish(str)
+        pub.publish(msg)
         r.sleep()
         
 if __name__ == '__main__':
     try:
-        emily_teleop()
+        keyboard_control() # keyboard controller
+        wall_detector() # uses proportional control to stay 1 meter away from the walls
     except rospy.ROSInterruptException: pass
