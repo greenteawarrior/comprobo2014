@@ -1,0 +1,17 @@
+http://wiki.ros.org/ROS/Tutorials/UsingRqtconsoleRoslaunch
+
+$ rosrun rqt_console rqt_console
+$ rosrun rqt_logger_level rqt_logger_level
+
+Logger levels (in order of priority)
+
+Fatal
+Error
+Warn
+Info
+Debug
+
+
+launch files
+turtlesim mimic example
+can also see the mimicking in rqt_graph
