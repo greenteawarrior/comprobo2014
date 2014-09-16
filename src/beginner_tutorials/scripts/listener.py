@@ -33,6 +33,8 @@
 #
 # Revision $Id$
 
+# http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber%28python%29
+
 ## Simple talker demo that listens to std_msgs/Strings published 
 ## to the 'chatter' topic
 
