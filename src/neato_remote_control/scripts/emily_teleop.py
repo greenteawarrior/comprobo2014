@@ -42,17 +42,53 @@ from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Vector3
 from sensor_msgs.msg import LaserScan
 
-def getch():
-    """ Return the next character typed on the keyboard """
-    import sys, tty, termios
-    fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
-    try:
-        tty.setraw(sys.stdin.fileno())
-        ch = sys.stdin.read(1)
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-    return ch
+class Neato_Controller():
+    """ 
+    Simple neato remote controller node. 
+
+    Keyboard controls:
+    a : go forward
+    k : pause
+    r : rotate
+
+    """
+
+    def __init__(self):
+        rospy.init_node('keyboard_control', anonymous=True)
+        self.pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+
+    def getch(self):
+        """ Return the next character typed on the keyboard """
+        import sys, tty, termios
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
+
+    def keyboard_control(self):
+        print 'Press a(go forward), k(pause), r(rotate), or q(quit).'
+        print 'Note: Please pause the robot before hitting q. thanks!'
+        r = rospy.Rate(10) # 10hz
+        while not rospy.is_shutdown():
+            ch = self.getch()
+            if ch == 'a': # go forward
+                msg = Twist(Vector3(1, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
+            elif ch == 'k': # pause
+                msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
+            elif ch == 'r': # rotate
+                msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 1))
+            elif ch == 'q': # quit
+                break
+            print ch
+            self.pub.publish(msg)
+            r.sleep()        
+
+    def run(self):
+        self.keyboard_control()
 
 def process_laser_scan(msg):
     """
@@ -88,40 +124,15 @@ def wall_detector():
         pub.publish(msg)
         r.sleep()
 
-def keyboard_control():
-    """ 
-    Simple neato remote controller. 
-
-    Keyboard controls:
-    a : go forward
-    k : pause
-    r : rotate
-
-    """
-    print 'Press a(go forward), k(pause), r(rotate), or q(quit).'
-    pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-    rospy.init_node('keyboard_control', anonymous=True)
-    
-    r = rospy.Rate(10) # 10hz
-    while not rospy.is_shutdown():
-        ch = getch()
-        if ch == 'a': # go forward
-            msg = Twist(Vector3(1, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
-        elif ch == 'k': # pause
-            msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
-        elif ch == 'r': # rotate
-            msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 1))
-        elif ch == 'q': 
-            msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
-        pub.publish(msg)
-        r.sleep()        
-    
+  
 # check out rostopic list -v (v optional)
 # rostopic type [type]
 # rosmsg show (thing above)
 
 if __name__ == '__main__':
     try:
-        keyboard_control() # keyboard controller
+        controller = Neato_Controller()
+        controller.run()
+        # keyboard_control() # keyboard controller
         # wall_detector() # uses proportional control to stay 1 meter away from the walls
     except rospy.ROSInterruptException: pass
