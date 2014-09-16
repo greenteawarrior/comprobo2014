@@ -1,0 +1,87 @@
+can push topics into a subfolder
+handle multiple robots
+
+multiagent launch?
+so... r2d2, johnnyfive
+
+a publisher for each robot 
+
+quick review of using rviz
+
+keeping track of multiple coordinate systems
+and transform between them
+
+add > by display type > robot model 
+
+
+software design advice:
+have a class for each of the nodes you write
+
+def __init__(self):
+    rospy.init_node('wall_follower', anonymous=True)
+    self.pub = rospy.Publisher('cmd_vel', Twist, queue_size=10) 
+    self.sub = rospy.Subscriber('scan', LaserScan, self.scan_received, pub)
+    self.mean_distance = -1.0
+
+pass in self, change mean_distance to self.mean_distance
+
+a run method - nice convention
+
+typical robotics design pattern: control loop
+things of state of robot are being kept track of in other threads
+
+
+
+showing us how to use the neato simulator:
+
+mux thing
+remap a topic thing from one thing to another?
+
+
+insert objects into the world
+grey wall for wall following
+
+lolol fast food places 
+probably not doing well in this world with only one robot
+
+it can push a bowl! 
+"yaaaay gooo... fake neato!"
+
+
+rviz
+
+gotcha: laserfinder
+if you go outside the thing
+it'll return the max value
+
+max range is ~5m
+
+just account for this fact in the code: cut off anything greater than 5
+
+
+
+coordinate frames
+chassis centered at baselink
+laserlink
+
+base_laser_link
+base_link
+odom
+
+moving coordinate system with respect to base length, ros can handle all these different coordinate frames and their changes over time; 
+
+
+
+kinematics of a robot
+
+assume wheels of robot are not slipping
+there's always some point in space in which the robot is rotating
+
+no matter what vels are sent to the left/right wheel, it's always rotating about some fixed pt in space
+
+instantaneous center of curvature
+ICC
+
+take the vector
+omega*t
+rotate as necessary

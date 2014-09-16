@@ -1,0 +1,39 @@
+some day3 comprobo notes
+
+Notes for neato usage:
+
+Wait a while so the ping is good
+Look for blue blinky wifi light
+Check the ribbon cable
+Make sure the pi's powered on
+
+
+starting from the publish/chatter example
+
+instead of a string, using twist on cmd_vel
+
+
+
+pseudo code for different neato movements:
+
+sin wave? going from side to side
+tracking velocity? 
+
+making functions: take in a vector, do computations, send a twist 
+
+msg = Twist(Vector3(...))
+
+
+-----
+
+closing the perception/action loop
+
+sensory data
+perform some computation to get useful info
+modify the command you send to the robot 
+
+$ rostopic msg scan
+$ rostopic type /scan
+$ rosmsg show sensor_msgs/LaserScan
+
+
