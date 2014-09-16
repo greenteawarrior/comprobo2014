@@ -42,6 +42,11 @@ from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Vector3
 from sensor_msgs.msg import LaserScan
 
+# check out rostopic list -v (v optional)
+# rostopic type [type]
+# rosmsg show (thing above)
+
+
 class Neato_Controller():
     """ 
     Simple neato remote controller node. 
@@ -56,6 +61,7 @@ class Neato_Controller():
     def __init__(self):
         rospy.init_node('keyboard_control', anonymous=True)
         self.pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+        self.sub = rospy.Subscriber('scan', LaserScan, self.process_laser_scan)
 
     def getch(self):
         """ Return the next character typed on the keyboard """
@@ -68,6 +74,9 @@ class Neato_Controller():
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
         return ch
+
+    def process_laser_scan(self, msg):
+        print msg.ranges # for educational purposes...
 
     def keyboard_control(self):
         print 'Press a(go forward), k(pause), r(rotate), or q(quit).'
@@ -85,54 +94,13 @@ class Neato_Controller():
                 break
             print ch
             self.pub.publish(msg)
-            r.sleep()        
+            r.sleep()            
 
     def run(self):
         self.keyboard_control()
-
-def process_laser_scan(msg):
-    """
-    Helper function for wall_detector() - obtains the laser scan 
-    data and then returns the running average of the distance from
-    the neato to the walls. 
-    """
-    # keep track of variables
-    wall_distance = 0
-    measurements = []
-
-    # calculate the average
-
-    # print the average
-    print avg_wall_distance
-
-
-def wall_detector():
-    """
-    Uses proportional control to make sure that the neato
-    stays one meter away from the walls.
-    """
-    pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-    sub = rospy.Subscriber('scan', LaserScan, process_laser_scan) 
-    # process_laser_scan is the callback function
-
-    rospy.init_node('emily_wall_detector', anonymous=True)
-    r = rospy.Rate(10) # 10hz
-    while not rospy.is_shutdown():
-
-        # logic for determining msg (Twist thing) here
-
-        pub.publish(msg)
-        r.sleep()
-
-  
-# check out rostopic list -v (v optional)
-# rostopic type [type]
-# rosmsg show (thing above)
 
 if __name__ == '__main__':
     try:
         controller = Neato_Controller()
         controller.run()
-        # keyboard_control() # keyboard controller
-        # wall_detector() # uses proportional control to stay 1 meter away from the walls
     except rospy.ROSInterruptException: pass
