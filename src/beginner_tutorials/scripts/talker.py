@@ -40,9 +40,17 @@ import rospy
 from std_msgs.msg import String
 
 def talker():
+    # node is publishing to the chatter topic using the 
+    # message type String
     pub = rospy.Publisher('chatter', String, queue_size=10)
+
+    # tells rospy the name of your node so it can start 
+    # communicating with the ROS Master
     rospy.init_node('talker', anonymous=True)
+
+    # convenient way for looping at the desired rate
     r = rospy.Rate(10) # 10hz
+    
     while not rospy.is_shutdown():
         str = "hello world %s"%rospy.get_time()
         rospy.loginfo(str)

@@ -51,6 +51,8 @@ def listener():
     # run simultaenously.
     rospy.init_node('listener', anonymous=True)
 
+    # when new messages are received, callback is invoked with 
+    # the message as the first argument
     rospy.Subscriber("chatter", String, callback)
 
     # spin() simply keeps python from exiting until this node is stopped
