@@ -38,6 +38,9 @@
 
 import rospy
 from std_msgs.msg import String
+from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Vector3
+from sensor_msgs.msg import LaserScan
 
 def getch():
     """ Return the next character typed on the keyboard """
@@ -58,8 +61,13 @@ def process_laser_scan(msg):
     the neato to the walls. 
     """
     # keep track of variables
+    wall_distance = 0
+    measurements = []
+
     # calculate the average
+
     # print the average
+    print avg_wall_distance
 
 
 def wall_detector():
@@ -75,7 +83,7 @@ def wall_detector():
     r = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
 
-        # logic for determining msg here
+        # logic for determining msg (Twist thing) here
 
         pub.publish(msg)
         r.sleep()
@@ -90,9 +98,10 @@ def keyboard_control():
     r : rotate
 
     """
+    print 'Press a(go forward), k(pause), r(rotate), or q(quit).'
     pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
     rospy.init_node('keyboard_control', anonymous=True)
-   
+    
     r = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
         ch = getch()
@@ -102,13 +111,17 @@ def keyboard_control():
             msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
         elif ch == 'r': # rotate
             msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 1))
-        elif ch == 'q':
-            break        
+        elif ch == 'q': 
+            msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
         pub.publish(msg)
-        r.sleep()
-        
+        r.sleep()        
+    
+# check out rostopic list -v (v optional)
+# rostopic type [type]
+# rosmsg show (thing above)
+
 if __name__ == '__main__':
     try:
         keyboard_control() # keyboard controller
-        wall_detector() # uses proportional control to stay 1 meter away from the walls
+        # wall_detector() # uses proportional control to stay 1 meter away from the walls
     except rospy.ROSInterruptException: pass
