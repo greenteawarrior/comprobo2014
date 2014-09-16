@@ -1,0 +1,38 @@
+http://wiki.ros.org/ROS/Tutorials/Recording%20and%20playing%20back%20data
+
+see what's up with topics
+$ rostopic list -v
+
+only published messages are recorded
+
+###
+to record the published data for all nodes (hence the -a)...
+$ mkdir ~/bagfiles
+$ cd ~/bagfiles
+$ rosbag record -a
+control-C when done with recording
+
+the resulting file (with the .bag suffix) has all the topics published by any node while rosbag record was happening
+
+###
+to examine and play the bag file
+$ rosbag info <your bagfile> 
+
+to "replay" what happened when stuff was being recorded....
+$ rosbag play <your bagfile>
+
+rosbag play also takes additional arguments if you want to start not at the beginning of the bag file or adjust its performance (ex. making the turtle go twice as fast by putting in -r 2 to the command)
+-)
+###
+you can also record subsets of the data
+(definitely relevant when there's a super complicated system)
+
+$ rosbag record -O subset /turtle1/command_velocity /turtle1/pose
+
+the -O tells rosbag record to log to a file named subset.bag
+topic arguments tell rosbag record to only subscripe to those topics
+
+### 
+note: rosbag record/play might not be a perfect replay
+e.g. turtlesim is sensitive to small changes in timing, so the path may not have been the exact same as the recorded session
+
