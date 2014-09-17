@@ -76,7 +76,8 @@ class Neato_Controller():
         return ch
 
     def process_laser_scan(self, msg):
-        print msg.ranges # for educational purposes...
+        # print msg # for educational purposes...
+        return
 
     def keyboard_control(self):
         print 'Press a(go forward), k(pause), r(rotate), or q(quit).'
@@ -91,6 +92,8 @@ class Neato_Controller():
             elif ch == 'r': # rotate
                 msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 1))
             elif ch == 'q': # quit
+                msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
+                self.pub.publish(msg)
                 break
             print ch
             self.pub.publish(msg)

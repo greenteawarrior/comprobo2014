@@ -22,6 +22,9 @@ class Wall_Follower():
         self.distance_to_wall = -1
         self.valid_measurements = []
 
+        # for proportional control things
+        self.Kp = .2
+
 
     def process_laser_scan(self, msg):
         """
@@ -30,13 +33,12 @@ class Wall_Follower():
         the neato to the walls. 
         """
 
-        # from wall_section2.py
-        valid_measurements = []
-        for i in range(5):
-            if msg.ranges[i] != 0 and msg.ranges[i] < 7:
-                valid_measurements.append(msg.ranges[i])
-        if len(valid_measurements):
-            self.distance_to_wall = sum(valid_measurements)/float(len(valid_measurements))
+        lidar_data = []
+        for i in [358, 359, 0, 1, 2]: # getting laser data at the 358th, 359th, 0th, 1st, and 2nd degrees 
+            if msg.ranges[i] != 0 and msg.ranges[i] < 5:
+                lidar_data.append(msg.ranges[i])
+        if len(lidar_data): # take the running average
+            self.distance_to_wall = sum(lidar_data)/float(len(lidar_data))
         else:
             self.distance_to_wall = -1.0
         print "according to lasers, the neato is %f meters away from the wall" % self.distance_to_wall
@@ -48,7 +50,7 @@ class Wall_Follower():
             if self.distance_to_wall == -1: # the action hasn't started yet
                 msg = Twist()
             else:
-                msg = Twist(linear=Vector3(x=(self.distance_to_wall-1)*.2))
+                msg = Twist(linear=Vector3(x=(self.distance_to_wall-1)*self.Kp))
             self.pub.publish(msg)
             r.sleep()
 
