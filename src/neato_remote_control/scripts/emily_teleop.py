@@ -80,7 +80,7 @@ class Neato_Controller():
         return
 
     def keyboard_control(self):
-        print 'Press a(go forward), k(pause), r(rotate), or q(quit).'
+        print 'Press a(go forward), k(pause), r(rotate), e(rotate 90 degrees) or q(quit).'
         print 'Note: Please pause the robot before hitting q. thanks!'
         r = rospy.Rate(10) # 10hz
         while not rospy.is_shutdown():
@@ -91,6 +91,8 @@ class Neato_Controller():
                 msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
             elif ch == 'r': # rotate
                 msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 1))
+            elif ch == 'e': # rotate 90 degrees
+                msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 90))
             elif ch == 'q': # quit
                 msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
                 self.pub.publish(msg)

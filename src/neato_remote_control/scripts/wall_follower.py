@@ -37,18 +37,15 @@ class Wall_Follower():
         lidar_data = []
 
         # find the angle in which the neato is 1m away from the wall
-        degree_to_wall = 0
+        estimated_degree_to_wall = 0
+        estimated_dist_to_wall = 5
+
         for i in range(len(msg.ranges)):
-            print 'degree to wall %d' % degree_to_wall
-            current_distance_at_angle = msg.ranges[degree_to_wall]
-            print 'current_distance_at_angle %d' % current_distance_at_angle
+            distance_at_current_angle = msg.ranges[i]
 
-            if current_distance_at_angle == 0.0 and msg.ranges[i] > 0:
-                degree_to_wall = i
-            elif current_distance_at_angle > 0.0 and msg.ranges[i] < current_distance_at_angle:
-                degree_to_wall = i
-
-        print degree_to_wall
+            if distance_at_current_angle > 0.0 and distance_at_current_angle < estimated_dist_to_wall:
+                estimated_degree_to_wall = i
+                estimated_dist_to_wall = msg.ranges[estimated_degree_to_wall]
 
         # rotate accordingly
         # how much does the neato need to rotate before it's parallel with the wall?
