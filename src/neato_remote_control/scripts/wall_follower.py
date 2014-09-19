@@ -20,12 +20,50 @@ class Wall_Follower():
         self.sub = rospy.Subscriber('scan', LaserScan, self.process_laser_scan)
 
         # for understanding laser scan things
-        self.distance_to_wall = -1
-        self.valid_measurements = []
-        self.turn_start_time = 0
+        self.front_lidar_data = []
+        self.front_distance = []
+        self.front_distance_to_wall = -1
+
+        self.side_lidar_data = []
+        self.side_distance = []
+        self.side_distance_to_wall = -1
+
+        self.parallel = False
+        self.radius = 1
 
         # for proportional control things
-        self.Kp = .2
+        self.Kp = .5
+
+
+    def take_running_average(self, angles, ranges, front_or_side):
+        if front_or_side == 'front':
+            for i in angles: # getting laser data at the 358th, 359th, 0th, 1st, and 2nd degrees 
+                if ranges[i] != 0 and ranges[i] < 5:
+                    self.front_lidar_data.append(ranges[i])
+            if len(self.front_lidar_data): # take the running average
+                self.front_distance_to_wall = sum(self.front_lidar_data)/float(len(self.front_lidar_data))
+                self.radius = self.front_distance_to_wall / 2
+            else:
+                self.front_distance_to_wall = -1.0
+            # self.front_lidar_data = []
+
+        elif front_or_side == 'side':
+            for i in angles: # getting laser data at the 358th, 359th, 0th, 1st, and 2nd degrees 
+                if ranges[i] != 0 and ranges[i] < 5:
+                    self.side_lidar_data.append(ranges[i])
+            if len(self.side_lidar_data): # take the running average
+                self.side_distance_to_wall = sum(self.side_lidar_data)/float(len(self.side_lidar_data))
+                if 0.9 < self.side_distance_to_wall < 1.1:
+                    self.parallel = True
+                else:
+                    self.parallel = False
+                # self.side_lidar_data = []
+            else:
+                self.side_distance_to_wall = -1.0
+
+        print "front_distance_to_wall" + str(self.front_distance_to_wall)
+        print "side_distance_to_wall" + str(self.side_distance_to_wall)
+
 
     def process_laser_scan(self, msg):
         """
@@ -36,16 +74,13 @@ class Wall_Follower():
         The "_linear" refers to how the neato will only check the dista
         """
 
-        lidar_data = []
-        for i in [358, 359, 0, 1, 2]: # getting laser data at the 358th, 359th, 0th, 1st, and 2nd degrees 
-            if msg.ranges[i] != 0 and msg.ranges[i] < 5:
-                lidar_data.append(msg.ranges[i])
-        if len(lidar_data): # take the running average
-            self.distance_to_wall = sum(lidar_data)/float(len(lidar_data))
-            self.radius = self.distance_to_wall / 2
-        else:
-            self.distance_to_wall = -1.0
-        print "according to lasers, the neato is %f meters away from the wall" % self.distance_to_wall
+        front_angles = [358, 359, 0, 1, 2]
+        # un/comment the side_angles depending on which side of wall you want to test for now
+        side_angles = [88, 89, 90, 91, 92] 
+        # side_angles = [268, 269, 270, 271, 272]
+
+        self.take_running_average(front_angles, msg.ranges, 'front')
+        self.take_running_average(side_angles, msg.ranges, 'side')
 
     def wall_follow(self):
         print "Wall follower, I choose you!"
@@ -53,40 +88,19 @@ class Wall_Follower():
         turning = True
 
         while not rospy.is_shutdown():
-            if self.distance_to_wall == -1: # the action hasn't started yet ; i.e. no followable walls detected 
-                msg = Twist()
-            # elif self.distance_to_wall <= 1.01 and self.distance_to_wall >= 0.9:
-            #     self.turn_start_time = rospy.get_time()
-            #     while turning: 
-            #         print 'wait what'
-            #         current_time = rospy.get_time()
-            #         msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 1))
-            #         if current_time - self.turn_start_time > math.pi/2:
-            #             turning = False
-            # elif turning == False:
-            #     msg = Twist(Vector3(1, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
-            else:
-                msg = Twist(linear=Vector3(x=(self.distance_to_wall-1)*self.Kp), angular=Vector3(z=(self.distance_to_wall-1)*self.Kp/self.radius))
+
+            # msg = Twist()
+
+            if not self.parallel:
+                msg = Twist(linear=Vector3(x=(self.front_distance_to_wall-1)*self.Kp), angular=Vector3(z=-(self.front_distance_to_wall-1)*self.Kp/self.radius))
+            elif self.parallel:
+                msg = Twist(linear=Vector3(x=.2))
+
             self.pub.publish(msg)
             r.sleep()
 
-    # def ninety_degree_turn(self):
-    #     print "Hey neato, turn 90 degrees!"
-    #     r = rospy.Rate(10) # 10hz
-
-    #     self.turn_start_time = rospy.get_time()
-    #     while not rospy.is_shutdown():
-    #         current_time = rospy.get_time()
-    #         if current_time - self.turn_start_time >= math.pi/2:
-    #             msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
-    #         else:
-    #             msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 1))
-    #         self.pub.publish(msg)
-    #         r.sleep()
-
     def run(self):
         self.wall_follow()
-        # self.ninety_degree_turn()
 
 if __name__ == '__main__':
     try:
