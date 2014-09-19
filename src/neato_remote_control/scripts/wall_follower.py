@@ -22,6 +22,7 @@ class Wall_Follower():
         # for understanding laser scan things
         self.distance_to_wall = -1
         self.valid_measurements = []
+        self.turn_start_time = 0
 
         # for proportional control things
         self.Kp = .2
@@ -32,7 +33,6 @@ class Wall_Follower():
         Callback function for wall_follow() - 
         determines where the neato should turn to become parallel with the wall.
         """
-
         # initialize useful things
         lidar_data = []
 
@@ -83,8 +83,44 @@ class Wall_Follower():
             self.pub.publish(msg)
             r.sleep()
 
+    def ninety_degree_turn(self):
+        print "Hey neato, turn 90 degrees!"
+        r = rospy.Rate(10) # 10hz
+
+        self.turn_start_time = rospy.get_time()
+        while not rospy.is_shutdown():
+            current_time = rospy.get_time()
+            if current_time - self.turn_start_time >= math.pi/2:
+                msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
+            else:
+                msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 1))
+            self.pub.publish(msg)
+            r.sleep()
+
+        # while not rospy.is_shutdown():
+        #     current_time = rospy.get_time()
+        #     ch = self.getch()
+        #     if ch == 'e':
+        #         self.turn_start_time = rospy.get_time()
+        #         msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 1))
+        #         print ch
+        #         print "turn_start_time" 
+        #         print self.turn_start_time
+        #         print
+        #     elif ch == 'q':
+        #         print ch
+        #         break
+        #     print current_time - self.turn_start_time
+        #     if current_time - self.turn_start_time >= 5:
+        #         msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
+        #         print 'merp'
+        #     self.pub.publish(msg)
+        #     r.sleep()
+
+
     def run(self):
-        self.wall_follow()
+        # self.wall_follow()
+        self.ninety_degree_turn()
 
 if __name__ == '__main__':
     try:
