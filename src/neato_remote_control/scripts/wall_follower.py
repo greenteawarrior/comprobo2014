@@ -27,30 +27,7 @@ class Wall_Follower():
         # for proportional control things
         self.Kp = .2
 
-
     def process_laser_scan(self, msg):
-        """
-        Callback function for wall_follow() - 
-        determines where the neato should turn to become parallel with the wall.
-        """
-        # initialize useful things
-        lidar_data = []
-
-        # find the angle in which the neato is 1m away from the wall
-        estimated_degree_to_wall = 0
-        estimated_dist_to_wall = 5
-
-        for i in range(len(msg.ranges)):
-            distance_at_current_angle = msg.ranges[i]
-
-            if distance_at_current_angle > 0.0 and distance_at_current_angle < estimated_dist_to_wall:
-                estimated_degree_to_wall = i
-                estimated_dist_to_wall = msg.ranges[estimated_degree_to_wall]
-
-        # rotate accordingly
-        # how much does the neato need to rotate before it's parallel with the wall?
-
-    def process_laser_scan_linear(self, msg):
         """
         0degree version of the callback function for wall_follow() - 
         obtains the laser scan data and then returns the 
@@ -72,55 +49,43 @@ class Wall_Follower():
     def wall_follow(self):
         print "Wall follower, I choose you!"
         r = rospy.Rate(10) # 10hz
-
-        # parallel state variable
-
+        turning = True
+        
         while not rospy.is_shutdown():
-            if self.distance_to_wall == -1: # the action hasn't started yet
+            if self.distance_to_wall == -1: # the action hasn't started yet ; i.e. no followable walls detected 
                 msg = Twist()
+            elif self.distance_to_wall <= 1.01 and self.distance_to_wall >= 0.9:
+                self.turn_start_time = rospy.get_time()
+                while turning: 
+                    print 'wait what'
+                    current_time = rospy.get_time()
+                    msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 1))
+                    if current_time - self.turn_start_time > math.pi/2:
+                        turning = False
+            elif turning == False:
+                msg = Twist(Vector3(1, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
             else:
                 msg = Twist(linear=Vector3(x=(self.distance_to_wall-1)*self.Kp))
             self.pub.publish(msg)
             r.sleep()
 
-    def ninety_degree_turn(self):
-        print "Hey neato, turn 90 degrees!"
-        r = rospy.Rate(10) # 10hz
+    # def ninety_degree_turn(self):
+    #     print "Hey neato, turn 90 degrees!"
+    #     r = rospy.Rate(10) # 10hz
 
-        self.turn_start_time = rospy.get_time()
-        while not rospy.is_shutdown():
-            current_time = rospy.get_time()
-            if current_time - self.turn_start_time >= math.pi/2:
-                msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
-            else:
-                msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 1))
-            self.pub.publish(msg)
-            r.sleep()
-
-        # while not rospy.is_shutdown():
-        #     current_time = rospy.get_time()
-        #     ch = self.getch()
-        #     if ch == 'e':
-        #         self.turn_start_time = rospy.get_time()
-        #         msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 1))
-        #         print ch
-        #         print "turn_start_time" 
-        #         print self.turn_start_time
-        #         print
-        #     elif ch == 'q':
-        #         print ch
-        #         break
-        #     print current_time - self.turn_start_time
-        #     if current_time - self.turn_start_time >= 5:
-        #         msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
-        #         print 'merp'
-        #     self.pub.publish(msg)
-        #     r.sleep()
-
+    #     self.turn_start_time = rospy.get_time()
+    #     while not rospy.is_shutdown():
+    #         current_time = rospy.get_time()
+    #         if current_time - self.turn_start_time >= math.pi/2:
+    #             msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
+    #         else:
+    #             msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 1))
+    #         self.pub.publish(msg)
+    #         r.sleep()
 
     def run(self):
-        # self.wall_follow()
-        self.ninety_degree_turn()
+        self.wall_follow()
+        # self.ninety_degree_turn()
 
 if __name__ == '__main__':
     try:
