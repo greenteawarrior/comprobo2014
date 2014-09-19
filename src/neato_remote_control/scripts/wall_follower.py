@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
+import math
 
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
@@ -28,9 +29,37 @@ class Wall_Follower():
 
     def process_laser_scan(self, msg):
         """
-        Callback function for wall_follow() - obtains the laser scan 
-        data and then returns the running average of the distance from
-        the neato to the walls. 
+        Callback function for wall_follow() - 
+        determines where the neato should turn to become parallel with the wall.
+        """
+
+        # initialize useful things
+        lidar_data = []
+
+        # find the angle in which the neato is 1m away from the wall
+        degree_to_wall = 0
+        for i in range(len(msg.ranges)):
+            print 'degree to wall %d' % degree_to_wall
+            current_distance_at_angle = msg.ranges[degree_to_wall]
+            print 'current_distance_at_angle %d' % current_distance_at_angle
+
+            if current_distance_at_angle == 0.0 and msg.ranges[i] > 0:
+                degree_to_wall = i
+            elif current_distance_at_angle > 0.0 and msg.ranges[i] < current_distance_at_angle:
+                degree_to_wall = i
+
+        print degree_to_wall
+
+        # rotate accordingly
+        # how much does the neato need to rotate before it's parallel with the wall?
+
+    def process_laser_scan_linear(self, msg):
+        """
+        0degree version of the callback function for wall_follow() - 
+        obtains the laser scan data and then returns the 
+        running average of the distance from the neato to the walls. 
+
+        The "_linear" refers to how the neato will only check the dista
         """
 
         lidar_data = []
@@ -46,6 +75,9 @@ class Wall_Follower():
     def wall_follow(self):
         print "Wall follower, I choose you!"
         r = rospy.Rate(10) # 10hz
+
+        # parallel state variable
+
         while not rospy.is_shutdown():
             if self.distance_to_wall == -1: # the action hasn't started yet
                 msg = Twist()
