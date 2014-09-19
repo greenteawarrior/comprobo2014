@@ -42,6 +42,7 @@ class Wall_Follower():
                 lidar_data.append(msg.ranges[i])
         if len(lidar_data): # take the running average
             self.distance_to_wall = sum(lidar_data)/float(len(lidar_data))
+            self.radius = self.distance_to_wall / 2
         else:
             self.distance_to_wall = -1.0
         print "according to lasers, the neato is %f meters away from the wall" % self.distance_to_wall
@@ -50,22 +51,22 @@ class Wall_Follower():
         print "Wall follower, I choose you!"
         r = rospy.Rate(10) # 10hz
         turning = True
-        
+
         while not rospy.is_shutdown():
             if self.distance_to_wall == -1: # the action hasn't started yet ; i.e. no followable walls detected 
                 msg = Twist()
-            elif self.distance_to_wall <= 1.01 and self.distance_to_wall >= 0.9:
-                self.turn_start_time = rospy.get_time()
-                while turning: 
-                    print 'wait what'
-                    current_time = rospy.get_time()
-                    msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 1))
-                    if current_time - self.turn_start_time > math.pi/2:
-                        turning = False
-            elif turning == False:
-                msg = Twist(Vector3(1, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
+            # elif self.distance_to_wall <= 1.01 and self.distance_to_wall >= 0.9:
+            #     self.turn_start_time = rospy.get_time()
+            #     while turning: 
+            #         print 'wait what'
+            #         current_time = rospy.get_time()
+            #         msg = Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 1))
+            #         if current_time - self.turn_start_time > math.pi/2:
+            #             turning = False
+            # elif turning == False:
+            #     msg = Twist(Vector3(1, 0.0, 0.0), Vector3(0.0, 0.0, 0.0))
             else:
-                msg = Twist(linear=Vector3(x=(self.distance_to_wall-1)*self.Kp))
+                msg = Twist(linear=Vector3(x=(self.distance_to_wall-1)*self.Kp), angular=Vector3(z=(self.distance_to_wall-1)*self.Kp/self.radius))
             self.pub.publish(msg)
             r.sleep()
 
