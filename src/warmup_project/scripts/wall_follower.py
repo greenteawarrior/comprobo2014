@@ -15,6 +15,16 @@ class Wall_Follower():
     """
 
     def __init__(self):
+        """ 
+        Sets up an instance of a Wall_Follower() object. 
+        Things that happen when a new instance is made:
+        - Set up the 'wall_follower' node
+        - Set up a 'cmd_vel' publisher
+        - Set up a 'scan' subscriber, with the process_laser_scan() method being the callback 
+        - Initialize variables for lidar measurements and proportional control 
+        (to be used in other Wall_Follower methods)
+        """
+
         rospy.init_node('wall_follower', anonymous=True)
         self.pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
         self.sub = rospy.Subscriber('scan', LaserScan, self.process_laser_scan)
