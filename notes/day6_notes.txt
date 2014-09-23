@@ -1,0 +1,54 @@
+might need to reimage sd card
+
+neato node should be running
+
+adhoc wireless works as long as the laptop is close enough to the neato to maintain communication
+
+execute adhoc_wireless <ipaddr of neato>
+
+to switch back to typical internet
+sudo ./normal_wireless.sh
+
+./shutdown_pi
+
+sidebar: move your window w/ window key + arrow keys 
+
+
+drawing picture
+going from diagram/flowchart - what exactly are the conditions to go from one state to another
+testing pieces
+
+
+rosbag
+
+semester timeline:
+setup+warmup project
+mobile robotics project
+computer vision project
+final project
+
+
+mobile robotics project
+2-3 people
+talk to paul about ideas
+
+
+localization
+    SLAM
+    particle filters
+path planning
+    path planning in ROS
+    learning by demonstration (#SHUML!! - maybe for final project though)
+multi-agent systems
+    swarm things
+
+open-ended project considerations
+    -wait to use the camera (there's a CV project after this one)
+    -have a well-defined and realistic MVP
+    -don't overestimate the neato
+    -make sure that the choice of project topic lines up w/learning goals
+        -algorithm oriented
+            SLAM? path planning? etc
+        -task oriented?
+            design a robot that does ____
+

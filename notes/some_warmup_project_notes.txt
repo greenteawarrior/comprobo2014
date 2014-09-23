@@ -1,0 +1,22 @@
+rostopic echo /scan
+
+
+rostopic pub -1 /cmd_vel geometry_msgs/Twist  '{linear:  {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0,y: 0.0,z: 30}}'
+
+
+am i parallel to the wall?
+
+    yes, so i'm going to go straight and check that i'm staying parallel
+        
+        are you still parallel?
+            yes, go straight
+            no, you should turn
+
+
+    no, so i'm going to turn until i am parallel
+
+        turning! 
+
+        are you parallel yet?
+            yes, go straight
+            no, you should turn appropriately
